@@ -11,11 +11,9 @@ const CardList = ({robots}) => {
             email={robots[i].email}
             />
     })
-    return (
-        <div>
-            { cardArray }
-        </div>
-    );
+    return cardArray.length === 0 ?
+        <h1>YOU FOUND NO ROBOTS!</h1> :
+        (<div>{ cardArray }</div>);
 }
 
 export default CardList;

@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { connect } from 'react-redux';
 import 'tachyons';
 
 import './App.css'
@@ -7,43 +8,54 @@ import ErrorBoundary from '../components/ErrorBoundary';
 import SearchBox from '../components/SearchBox';
 import CardList from '../components/cardList';
 import Scroll from '../components/Scroll';
-//import {robots} from './robots';  // { } if there's no default export 
 
-// Virtual DOM collects this entire state - robots, searchfields - react passes them down as props down below functions?
-class App extends Component {
-  constructor() {
-    super()     // calls the constructor of the component?
-    this.state = {
-      robots: [],
-      searchfield: ''
-    }
+import { requestRobots, setSearchField } from '../actions';
+
+// mapStateToProps - what state do I need to listen to
+const mapStateToProps = state => {
+  return {
+    searchField: state.searchRobots.searchField,
+    robots: state.requestRobots.robots,
+    isPending: state.requestRobots.isPending,
+    error: state.requestRobots.error
   }
+}
+
+// mapDispatchToProps - what event should I listen to do I dispatch to reducer?
+const mapDispatchToProps = (dispatch) => {  
+  return {
+    onSearchChange: (event) => dispatch(setSearchField(event.target.value)),
+    onRequestRobots: () => dispatch(requestRobots())
+  }
+}
+
+class App extends Component {
+  // constructor() {
+  //   super()   
+  //   this.state = {
+  //     robots: [],
+  //     // searchField: ''
+  //   }
+  // } 
 
   componentDidMount() {
-    fetch('https://jsonplaceholder.typicode.com/users')
-      .then(response => response.json())
-      .then(users => this.setState({ robots: users }));
-  }
-
-  // originally onSearchChange(event) {...} will give typeerror: cannot read 'state' undefined
-  // the value of this is not refering to the class App but inside the searchBox's input. And input don't have state.robots
-  // Anytime you make own method, use function = () => {} arrow function to make sure this value is refering to class App
-  onSearchChange = (event) => {
-    this.setState({ searchfield: event.target.value })
-  }
+    // fetch('https://jsonplaceholder.typicode.com/users')
+    //   .then(response => response.json())
+    //   .then(users => { this.setState({ robots: users })});
+    this.props.onRequestRobots();
+  } 
 
   render () {
-    const { robots, searchfield } = this.state
-    const filteredRobots = robots.filter(robots => {
-      return robots.name.toLowerCase().includes(searchfield.toLowerCase());
+    const { searchField, onSearchChange, robots, isPending } = this.props;
+  const filteredRobots = robots.filter(robots => {
+    return robots.name.toLowerCase().includes(searchField.toLowerCase());
     })
-    if (robots.length === 0) {
-      return <h1 className='tc'>Loading</h1>
-    } else {
-    return (
+    return isPending ?
+     <h1 className='tc'>Loading</h1> :
+    (
       <div className="tc">
         <h1 className='f1'>RoboFriends</h1>
-        <SearchBox searchChange={this.onSearchChange}/>
+        <SearchBox searchChange={onSearchChange}/>
         <Scroll>
           <ErrorBoundary>
             <CardList robots={ filteredRobots }/>
@@ -51,8 +63,7 @@ class App extends Component {
         </Scroll>
       </div>
     );
-    }
   }
-}
+ }
 
-export default App;
+export default connect(mapStateToProps, mapDispatchToProps)(App);
