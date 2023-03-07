@@ -10,6 +10,7 @@ import CardList from '../components/cardList';
 import Scroll from '../components/Scroll';
 
 import { requestRobots, setSearchField } from '../actions';
+import Header from '../components/Header';
 
 // mapStateToProps - what state do I need to listen to
 const mapStateToProps = state => {
@@ -47,14 +48,14 @@ class App extends Component {
 
   render () {
     const { searchField, onSearchChange, robots, isPending } = this.props;
-  const filteredRobots = robots.filter(robots => {
+    const filteredRobots = robots.filter(robots => {
     return robots.name.toLowerCase().includes(searchField.toLowerCase());
     })
     return isPending ?
      <h1 className='tc'>Loading</h1> :
     (
       <div className="tc">
-        <h1 className='f1'>RoboFriends</h1>
+        <Header />
         <SearchBox searchChange={onSearchChange}/>
         <Scroll>
           <ErrorBoundary>
